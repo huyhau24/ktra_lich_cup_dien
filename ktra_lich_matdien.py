@@ -87,7 +87,7 @@ def main():
     current_data = scrape_outage_data()
     previous_data = load_previous_data()
 
-    if compare_data(current_data, previous_data):
+    if True:
         print("🔄 Phát hiện thay đổi lịch cúp điện.")
         send_email(current_data)
         save_current_data(current_data)
