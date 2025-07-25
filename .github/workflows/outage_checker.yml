@@ -2,12 +2,13 @@ name: Power Outage Checker
 
 on:
   schedule:
-    - cron: '0 1 * * *'  # Chạy lúc 01:00 UTC (8:00 sáng giờ Việt Nam)
-  workflow_dispatch:
+    - cron: '0 1 * * *'  # Chạy lúc 8h sáng Việt Nam (1h UTC)
+  workflow_dispatch:  # Cho phép chạy thủ công
 
 jobs:
   check-outage:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -37,5 +38,4 @@ jobs:
           git remote set-url origin https://x-access-token:${TOKEN}@github.com/${{ github.repository }}
           git add previous_outage_data.json
           git commit -m "Update outage data" || echo "No changes to commit"
-          git push
-
+          git push || echo "Push failed, but continuing..."
