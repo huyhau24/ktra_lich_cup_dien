@@ -18,7 +18,7 @@ SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
 SENDER_EMAIL = os.getenv("SENDER_EMAIL")  # Lấy từ biến môi trường
 SENDER_PASSWORD = os.getenv("SENDER_PASSWORD")  # Lấy từ biến môi trường
-RECEIVER_EMAIL = "your_receiver_email@example.com"  # Thay bằng email người nhận
+RECEIVER_EMAIL = "huyhau2004@gmail.com"  # Thay bằng email người nhận
 
 def scrape_outage_data():
     """Lấy dữ liệu lịch cúp điện từ trang web."""
