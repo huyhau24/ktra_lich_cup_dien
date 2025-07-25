@@ -1,10 +1,9 @@
-```yaml
 name: Power Outage Checker
 
 on:
   schedule:
     - cron: '0 1 * * *'  # Chạy lúc 01:00 UTC (8:00 sáng giờ Việt Nam, +07:00)
-  workflow_dispatch:  # Cho phép chạy thủ công
+  workflow_dispatch:
 
 jobs:
   check-outage:
@@ -36,4 +35,3 @@ jobs:
           git add previous_outage_data.json
           git commit -m "Update outage data" || echo "No changes to commit"
           git push
-```
