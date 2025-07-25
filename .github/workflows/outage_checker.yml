@@ -28,10 +28,13 @@ jobs:
           SENDER_PASSWORD: ${{ secrets.SENDER_PASSWORD }}
         run: python ktra_lich_matdien.py
 
-      - name: Commit changes
-        run: |
-          git config --global user.name 'github-actions'
-          git config --global user.email 'github-actions@github.com'
-          git add previous_outage_data.json
-          git commit -m "Update outage data" || echo "No changes to commit"
-          git push
+        - name: Commit changes
+          env:
+            TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          run: |
+            git config --global user.name 'github-actions'
+            git config --global user.email 'github-actions@github.com'
+            git remote set-url origin https://x-access-token:${TOKEN}@github.com/${{ github.repository }}
+            git add previous_outage_data.json
+            git commit -m "Update outage data" || echo "No changes to commit"
+            git push
