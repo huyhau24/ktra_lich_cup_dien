@@ -2,7 +2,7 @@ name: Power Outage Checker
 
 on:
   schedule:
-    - cron: '0 1 * * *'  # Chạy lúc 01:00 UTC (8:00 sáng giờ Việt Nam, +07:00)
+    - cron: '0 1 * * *'  # Chạy lúc 01:00 UTC (8:00 sáng giờ Việt Nam)
   workflow_dispatch:
 
 jobs:
