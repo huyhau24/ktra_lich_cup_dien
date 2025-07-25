@@ -8,52 +8,56 @@ from email.mime.text import MIMEText
 # URL của trang web mục tiêu
 URL = "https://lichcupdien.app/huyen-hon-quan/"
 
-# Đường dẫn file lưu dữ liệu trước đó
+# File lưu dữ liệu trước đó
 PREVIOUS_DATA_FILE = "previous_outage_data.json"
 
-# Thông tin email
+# Email cấu hình
 SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
 SENDER_EMAIL = os.getenv("SENDER_EMAIL")
 SENDER_PASSWORD = os.getenv("SENDER_PASSWORD")
-RECEIVER_EMAIL = "huyhau2004@gmail.com"  # Thay bằng email người nhận
+RECEIVER_EMAIL = "huyhau2004@gmail.com"
 
 def scrape_outage_data():
-    """Lấy dữ liệu lịch cúp điện từ trang web."""
     try:
         response = requests.get(URL)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
 
-        # Danh sách lưu thông tin cúp điện không trùng
         outage_data = []
         seen_texts = set()
 
-        divs = soup.find_all('div')
-        for div in divs:
-            text = div.get_text(separator='\n').strip()
-
+        all_divs = soup.find_all('div')
+        for div in all_divs:
+            text = div.get_text(separator="\n").strip()
             if "Tân Hưng" in text and text not in seen_texts:
                 seen_texts.add(text)
 
-                # Lấy ngày
+                # Tách thông tin ngày
+                date = ""
                 if "Ngày:" in text:
-                    date = text.split("Ngày:")[1].split("\n")[0].strip()
-                else:
-                    date = ""
+                    try:
+                        date = text.split("Ngày:")[1].split("\n")[0].strip()
+                    except:
+                        pass
 
-                # Lấy thời gian
+                # Tách thời gian
+                time = ""
                 if "Thời gian: Từ:" in text and "Đến:" in text:
                     try:
                         start = text.split("Thời gian: Từ:")[1].split("Đến:")[0].strip()
                         end = text.split("Đến:")[1].split("\n")[0].strip()
                         time = f"{start} - {end}"
                     except:
-                        time = ""
-                else:
-                    time = ""
+                        pass
 
-                area = "Xã Tân Hưng"
+                # Tách khu vực nếu có
+                area = "Tân Hưng"
+                if "Khu vực:" in text:
+                    try:
+                        area = text.split("Khu vực:")[1].split("\n")[0].strip()
+                    except:
+                        pass
 
                 outage_data.append({
                     "date": date,
@@ -88,12 +92,18 @@ def compare_data(current, previous):
 
 def send_email(changed_data):
     try:
-        content = "🔌 **Thông báo lịch cúp điện mới tại xã Tân Hưng:**\n\n"
+        message = "🔌 **Lịch cúp điện mới tại xã Tân Hưng:**\n\n"
         for entry in changed_data:
-            content += f"- Ngày: {entry['date']}\n  Thời gian: {entry['time']}\n  Khu vực: {entry['area']}\n\n"
+            message += (
+                f"- 📅 Ngày: {entry['date']}\n"
+                f"  🕒 Thời gian: {entry['time']}\n"
+                f"  📍 Khu vực: {entry['area']}\n\n"
+            )
 
-        msg = MIMEText(content)
-        msg['Subject'] = "Cập nhật lịch cúp điện xã Tân Hưng"
+        message += f"🔗 Xem chi tiết tại: {URL}"
+
+        msg = MIMEText(message)
+        msg['Subject'] = "🔔 Cập nhật lịch cúp điện xã Tân Hưng"
         msg['From'] = SENDER_EMAIL
         msg['To'] = RECEIVER_EMAIL
 
@@ -111,7 +121,7 @@ def main():
     previous_data = load_previous_data()
 
     if compare_data(current_data, previous_data):
-        print("🔁 Phát hiện thay đổi trong lịch cúp điện.")
+        print("🔁 Có thay đổi trong lịch cúp điện.")
         send_email(current_data)
         save_current_data(current_data)
     else:
