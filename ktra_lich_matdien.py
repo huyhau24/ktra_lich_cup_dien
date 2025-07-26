@@ -99,6 +99,13 @@ def main():
     # 3. Tiến hành kiểm tra dữ liệu mới
     current_data = scrape_outage_data()
     previous_data = load_json(PREVIOUS_DATA_FILE)
+    
+    # Nếu không có previous_data thì khởi tạo lần đầu
+    if not previous_data:
+        print("🆕 Chưa có dữ liệu cũ, tạo mới và không gửi email.")
+        save_json(PREVIOUS_DATA_FILE, current_data)
+        save_json(RUN_FLAG_FILE, {"last_run_date": today_str})
+        return
 
     # 4. Nếu có thay đổi và có mục chứa Tân Hưng → gửi
     if current_data and current_data != previous_data:
