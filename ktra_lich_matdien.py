@@ -81,50 +81,19 @@ def save_json(filename, data):
 
 # --- HÀM CHÍNH ---
 def main():
-    now = datetime.now()
-    today_str = now.strftime("%Y-%m-%d")
-    current_hour = now.hour
+    print("⚡️ Test ghi file JSON")
 
-    # 1. Nếu chưa đến 8h sáng, không chạy
-    if current_hour < 8:
-        print("⏰ Chưa đến 8h sáng, không kiểm tra.")
-        return
+    test_data = [
+        {
+            "date": "2025-08-03",
+            "time": "08:00 - 10:00",
+            "area": "Tân Khai"
+        }
+    ]
 
-    # 2. Nếu đã xử lý hôm nay rồi → không làm gì
-    run_flag = load_json(RUN_FLAG_FILE)
-    if run_flag.get("last_run_date") == today_str:
-        print("✅ Hôm nay đã xử lý, không gửi lại.")
-        return
+    save_json(PREVIOUS_DATA_FILE, test_data)
+    save_json(RUN_FLAG_FILE, {"last_run_date": "2025-08-03"})
 
-    # 3. Lấy dữ liệu hiện tại
-    current_data = scrape_outage_data()
-    print(f"📦 Dữ liệu lấy được: {len(current_data)} mục")
-
-    if not current_data:
-        print("⚠️ Không có dữ liệu nào phù hợp (Tân Khai). Dừng lại.")
-        return
-
-    previous_data = load_json(PREVIOUS_DATA_FILE)
-
-    if not previous_data:
-        print("🆕 Chưa có dữ liệu cũ, tạo mới.")
-        save_json(PREVIOUS_DATA_FILE, current_data)
-        save_json(RUN_FLAG_FILE, {"last_run_date": today_str})
-        return
-
-    # 4. Nếu có thay đổi → gửi
-    if current_data != previous_data:
-        print("🔁 Có thay đổi, gửi email.")
-        send_email(current_data)
-        save_json(PREVIOUS_DATA_FILE, current_data)
-    else:
-        print("✅ Không có thay đổi.")
-
-    # 5. Đánh dấu đã xử lý
-    save_json(RUN_FLAG_FILE, {"last_run_date": today_str})
-
-    data = scrape_outage_data()
-    print(json.dumps(data, indent=4, ensure_ascii=False))
 
 
 if __name__ == "__main__":
