@@ -1,14 +1,16 @@
 name: Power Outage Checker
 
 on:
-  workflow_dispatch:
+  schedule:
+    - cron: '0 1 * * *'  # 8h sáng VN (1h UTC)
+  workflow_dispatch:  # Cho phép chạy thủ công
 
 jobs:
   check-outage:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v3
 
       - name: Set up Python
@@ -19,13 +21,19 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Run script
+      - name: Run outage checker
+        env:
+          SENDER_EMAIL: ${{ secrets.SENDER_EMAIL }}
+          SENDER_PASSWORD: ${{ secrets.SENDER_PASSWORD }}
         run: python ktra_lich_matdien.py
 
-      - name: Commit updates if any
+      - name: Commit changes
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git remote set-url origin https://x-access-token:${TOKEN}@github.com/${{ github.repository }}
           git add previous_data.json run_flag.json
           git diff --cached --quiet || git commit -m "🔄 Update data"
-          git push
+          git push || echo "Push failed"
