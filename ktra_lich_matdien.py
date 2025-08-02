@@ -96,27 +96,36 @@ def main():
         print("✅ Hôm nay đã xử lý, không gửi lại.")
         return
 
-    # 3. Tiến hành kiểm tra dữ liệu mới
+    # 3. Lấy dữ liệu hiện tại
     current_data = scrape_outage_data()
+    print(f"📦 Dữ liệu lấy được: {len(current_data)} mục")
+
+    if not current_data:
+        print("⚠️ Không có dữ liệu nào phù hợp (Tân Khai). Dừng lại.")
+        return
+
     previous_data = load_json(PREVIOUS_DATA_FILE)
-    
-    # Nếu không có previous_data thì khởi tạo lần đầu
+
     if not previous_data:
-        print("🆕 Chưa có dữ liệu cũ, tạo mới và không gửi email.")
+        print("🆕 Chưa có dữ liệu cũ, tạo mới.")
         save_json(PREVIOUS_DATA_FILE, current_data)
         save_json(RUN_FLAG_FILE, {"last_run_date": today_str})
         return
 
-    # 4. Nếu có thay đổi và có mục chứa Tân Hưng → gửi
-    if current_data and current_data != previous_data:
-        print("🔁 Có thay đổi dữ liệu & có Tân Hưng, gửi email.")
+    # 4. Nếu có thay đổi → gửi
+    if current_data != previous_data:
+        print("🔁 Có thay đổi, gửi email.")
         send_email(current_data)
         save_json(PREVIOUS_DATA_FILE, current_data)
     else:
-        print("✅ Không có cập nhật mới hoặc không có Tân Hưng.")
+        print("✅ Không có thay đổi.")
 
-    # 5. Cập nhật cờ đã xử lý hôm nay
+    # 5. Đánh dấu đã xử lý
     save_json(RUN_FLAG_FILE, {"last_run_date": today_str})
+
+    data = scrape_outage_data()
+    print(json.dumps(data, indent=4, ensure_ascii=False))
+
 
 if __name__ == "__main__":
     main()
