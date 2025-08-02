@@ -1,16 +1,14 @@
 name: Power Outage Checker
 
 on:
-  schedule:
-    - cron: '0 1 * * *'  # 8h sáng VN (1h UTC)
-  workflow_dispatch:  # Cho phép chạy thủ công
+  workflow_dispatch:
 
 jobs:
   check-outage:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout repo
         uses: actions/checkout@v3
 
       - name: Set up Python
@@ -18,30 +16,16 @@ jobs:
         with:
           python-version: '3.9'
 
-      - name: Cache pip dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Run outage checker
-        env:
-          SENDER_EMAIL: ${{ secrets.SENDER_EMAIL }}
-          SENDER_PASSWORD: ${{ secrets.SENDER_PASSWORD }}
+      - name: Run script
         run: python ktra_lich_matdien.py
 
-      - name: Commit changes
-        env:
-          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Commit updates if any
         run: |
-          git config --global user.name 'github-actions'
-          git config --global user.email 'github-actions@github.com'
-          git remote set-url origin https://x-access-token:${TOKEN}@github.com/${{ github.repository }}
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
           git add previous_data.json run_flag.json
-          git commit -m "Update outage data" || echo "No changes to commit"
-          git push || echo "Push failed, but continuing..."
+          git diff --cached --quiet || git commit -m "🔄 Update data"
+          git push
