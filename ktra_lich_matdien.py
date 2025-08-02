@@ -3,11 +3,21 @@ from bs4 import BeautifulSoup
 import json
 import os
 from datetime import datetime
+import smtplib
+from email.mime.text import MIMEText
 
+# --- CẤU HÌNH ---
 URL = "https://lichcupdien.app/huyen-hon-quan/"
 PREVIOUS_DATA_FILE = "previous_data.json"
 RUN_FLAG_FILE = "run_flag.json"
 
+SMTP_SERVER = "smtp.gmail.com"
+SMTP_PORT = 587
+SENDER_EMAIL = os.getenv("SENDER_EMAIL")
+SENDER_PASSWORD = os.getenv("SENDER_PASSWORD")
+RECEIVER_EMAIL = "huyhau2004@gmail.com"
+
+# --- HÀM LẤY DỮ LIỆU TỪ WEB ---
 def scrape_outage_data():
     try:
         response = requests.get(URL)
@@ -17,7 +27,7 @@ def scrape_outage_data():
 
         items = soup.find_all("li", class_="item-data-search-province")
         for item in items:
-            if "Tân Khai" not in item.get_text():
+            if "Tân Hưng" not in item.get_text():
                 continue
 
             day = item.find("p", class_="item-properties-data-search-province-day")
@@ -36,39 +46,70 @@ def scrape_outage_data():
         print("❌ Lỗi lấy dữ liệu:", e)
         return []
 
-def load_json(filename, default):
+# --- HÀM GỬI EMAIL ---
+def send_email(data):
+    try:
+        content = "🔌 Lịch cúp điện mới tại xã Tân Hưng:\n\n"
+        for d in data:
+            content += f"- 📅 Ngày: {d['date']}\n"
+            content += f"  ⏰ Thời gian: {d['time']}\n"
+            content += f"  📍 Khu vực: {d['area']}\n\n"
+        content += f"🔗 Xem chi tiết: {URL}"
+
+        msg = MIMEText(content, "plain", "utf-8")
+        msg["Subject"] = "🔔 Cập nhật lịch cúp điện xã Tân Hưng"
+        msg["From"] = SENDER_EMAIL
+        msg["To"] = RECEIVER_EMAIL
+
+        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+            server.starttls()
+            server.login(SENDER_EMAIL, SENDER_PASSWORD)
+            server.sendmail(SENDER_EMAIL, RECEIVER_EMAIL, msg.as_string())
+        print("✅ Email đã gửi.")
+    except Exception as e:
+        print("❌ Lỗi gửi email:", e)
+
+# --- HỖ TRỢ ĐỌC/GHI FILE JSON ---
+def load_json(filename):
     if os.path.exists(filename):
         with open(filename, "r", encoding="utf-8") as f:
-            try:
-                return json.load(f)
-            except json.JSONDecodeError:
-                return default
-    return default
+            return json.load(f)
+    return {}
 
 def save_json(filename, data):
     with open(filename, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
 
+# --- HÀM CHÍNH ---
 def main():
-    today_str = datetime.now().strftime("%Y-%m-%d")
+    now = datetime.now()
+    today_str = now.strftime("%Y-%m-%d")
+    current_hour = now.hour
 
-    run_flag = load_json(RUN_FLAG_FILE, {})
+    if current_hour < 8:
+        print("⏰ Chưa đến 8h sáng, không kiểm tra.")
+        return
+
+    run_flag = load_json(RUN_FLAG_FILE)
     if run_flag.get("last_run_date") == today_str:
         print("✅ Hôm nay đã xử lý, không gửi lại.")
         return
 
     current_data = scrape_outage_data()
-    previous_data = load_json(PREVIOUS_DATA_FILE, [])
+    previous_data = load_json(PREVIOUS_DATA_FILE)
 
-    if not current_data:
-        print("❌ Không có dữ liệu mới.")
+    if not previous_data:
+        print("🆕 Chưa có dữ liệu cũ, tạo mới.")
+        save_json(PREVIOUS_DATA_FILE, current_data)
+        save_json(RUN_FLAG_FILE, {"last_run_date": today_str})
         return
 
-    if current_data != previous_data:
-        print("🆕 Có thay đổi, cập nhật file.")
+    if current_data and current_data != previous_data:
+        print("🔁 Có thay đổi dữ liệu & có Tân Hưng, gửi email.")
+        send_email(current_data)
         save_json(PREVIOUS_DATA_FILE, current_data)
     else:
-        print("✅ Dữ liệu giống cũ, không cập nhật.")
+        print("✅ Không có cập nhật mới hoặc không có Tân Hưng.")
 
     save_json(RUN_FLAG_FILE, {"last_run_date": today_str})
 
