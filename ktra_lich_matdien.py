@@ -8,7 +8,7 @@ from email.mime.text import MIMEText
 
 # --- CẤU HÌNH ---
 URL = "https://lichcupdien.app/huyen-hon-quan/"
-PREVIOUS_DATA_FILE = "previous_outage_data.json"
+PREVIOUS_DATA_FILE = "previous_data.json"
 RUN_FLAG_FILE = "run_flag.json"
 
 SMTP_SERVER = "smtp.gmail.com"
