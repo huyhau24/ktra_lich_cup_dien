@@ -86,9 +86,9 @@ def main():
     today_str = now.strftime("%Y-%m-%d")
     current_hour = now.hour
 
-    if current_hour < 8:
-        print("⏰ Chưa đến 8h sáng, không kiểm tra.")
-        return
+    # if current_hour < 8:
+    #     print("⏰ Chưa đến 8h sáng, không kiểm tra.")
+    #     return
 
     run_flag = load_json(RUN_FLAG_FILE)
     if run_flag.get("last_run_date") == today_str:
