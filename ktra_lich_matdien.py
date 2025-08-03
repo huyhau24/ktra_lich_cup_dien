@@ -27,7 +27,7 @@ def scrape_outage_data():
 
         items = soup.find_all("li", class_="item-data-search-province")
         for item in items:
-            if "Tân Khai" not in item.get_text():
+            if "Tân Hưng" not in item.get_text():
                 continue
 
             day = item.find("p", class_="item-properties-data-search-province-day")
