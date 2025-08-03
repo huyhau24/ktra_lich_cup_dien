@@ -15,7 +15,7 @@ SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
 SENDER_EMAIL = os.getenv("SENDER_EMAIL")
 SENDER_PASSWORD = os.getenv("SENDER_PASSWORD")
-RECEIVER_EMAIL = "huyhau2004@gmail.com"
+RECEIVER_EMAIL = "kieumienblbp71@gmail.com"
 
 # --- HÀM LẤY DỮ LIỆU TỪ WEB ---
 def scrape_outage_data():
