@@ -86,7 +86,7 @@ def main():
     today_str = now.strftime("%Y-%m-%d")
     current_hour = now.hour
 
-    if current_hour < 8:
+    if current_hour < 1:
         print("⏰ Chưa đến 8h sáng, không kiểm tra.")
         return
 
