@@ -1,7 +1,17 @@
 [
     {
-        "date": "26-06-2026",
+        "date": "13-07-2026",
         "time": "07:30 - 16:30",
-        "area": "KHU VỰC: Một phần xã Tân Hưng (các Ấp: Hưng Lập A, Hưng Lập B, Hưng Yên, Hưng Phát, Lòng Hồ, Sở Xiêm, Sóc Ruộng, Sóc Quả, Đông Hồ), một phần xã Tân Quan ( các Ấp: Hưng Thạnh, Sóc Lếch )- TP Đồng Nai"
+        "area": "KHU VỰC: Một phần ấp Trà Thanh, xã Tân Hưng, TP Đồng Nai"
+    },
+    {
+        "date": "13-07-2026",
+        "time": "07:30 - 16:30",
+        "area": "KHU VỰC: Một phần ấp Thuận An, xã Tân Hưng, TP Đồng Nai"
+    },
+    {
+        "date": "16-07-2026",
+        "time": "07:30 - 16:30",
+        "area": "KHU VỰC: Một phần ấp 5, xã Tân Hưng, TP Đồng Nai"
     }
 ]
